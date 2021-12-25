@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en-US" dir="ltr">
+    <head>
+        <meta charset='utf-8'>
+        <title>Login</title> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Get the weather!">
+       
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin=""/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript">
+            
+            $(document).ready(function() {
+                $("#get_loc").click(function () {
+                    var ip_requested = $('#ip_add').val();
+                    console.log(ip_requested);
+                    var results_element = $('#resultsDiv');
+                    const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+                    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                   
+                    var API_KEY = '<%= process.env.API_KEY %>';
+                    var AUTH = '<%= process.env.AUTH %>';
+
+                    $.ajax({
+                        url:API_KEY,
+                        method: 'get',
+                        data:{
+                            ip:ip_requested,
+                            auth:AUTH
+                        },
+                        dataType: 'json',
+                        success: function(response){
+                            if(response.message !=  null){
+                                results_element.html(response.message)
+                            }
+                            else{
+                                results_element.html(
+                                 'Longitude: '+ response.longitude + '</br>'
+                                +'Latitude: '+ response.latitude+ '</br>'
+                                );
+                                var map = L.map('map').setView([response.latitude, response.longitude], 8);
+                                const tiles = L.tileLayer(tileUrl, {attribution});
+                                tiles.addTo(map)
+                                L.marker([response.latitude,response.longitude]).addTo(map);
+                            }
+                        },
+                        error: function(answer, err){
+                            
+                            results_element.html(answer.responseJSON.message);
+                        }
+
+                    });
+                });
+
+            });
+           
+            
+        </script>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+        <style>
+       
+            body{
+                background-color:rgba(255, 238, 0, 0.295)
+            }
+            p{
+                font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            }
+            a:link{
+                color:#0000ff;
+                font: 14px Arial, sans-serif
+            }
+            a:visited{
+                color:red;
+                font: 10px sans-serif, Arial
+            }
+            a:hover{
+                color:green;
+                font: 20px sans-serif, Arial
+            }
+            div{
+                padding:5px;
+                margin:5px auto; 
+            }
+            img {
+                max-width: 100%;
+                height: auto;
+                width: auto; /* ie8 */
+            }
+            #map{
+                height: 400px;
+            }
+        </style>
+    </head>
+   
+    <body>
+        <div class="container">
+            
+            <header style="color: rgb(116, 0, 0);">
+                <h1>IP Address Lookup</h1>
+                <h5>Using IpFind geolocation services.</h5>
+            </header>
+        </div>
+        
+
+
+        <div class="text-center m5" id="login">
+            <div class="page-header">
+                <h3>Welcome to Dashboard</h3>
+                <a href="/users/Logout">Logout</a>
+            </div>
+        </div>
+    
+      
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3>Input an IP addres:</h3>
+                    <table>
+                        <tr>
+                            <td>IP:</td>
+                            <td><input type="text" id="ip_add"/></td>
+                        </tr>
+                    </table>
+                    <input type="button" id="get_loc" value="Get Location">
+                    <br /><br />
+                    <div id="resultsDiv">
+                    </div>
+                    <br /><br />
+                    <div id="map">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>
